@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.pm.PackageManager
-import android.media.MediaDrm.SessionException
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.compose.runtime.getValue
@@ -13,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
-import com.example.tabletopar.screens.hasARSupportingError
 import com.google.ar.core.ArCoreApk
 import com.google.ar.core.Config
 import com.google.ar.core.Session
@@ -22,8 +20,8 @@ import java.lang.Exception
 class ArViewModel(
     val activity: Activity,
     val context: Context,
-    val application: Application
-): AndroidViewModel(application) {
+    val app: Application
+): AndroidViewModel(app) {
     var userRequestedInstall by mutableStateOf(true)
     var session by mutableStateOf<Session?>(null)
 
@@ -40,6 +38,8 @@ class ArViewModel(
 
         // Configure the session.
         session?.configure(config)
+
+        Log.d("ArViewModel", "createSession: session created")
     }
 
     fun closeSession() {
@@ -68,8 +68,8 @@ class ArViewModel(
     // Both AR Optional and AR Required apps must ensure that the camera permission has been granted before creating an AR Session.
     fun checkCameraPermission(launcher: ManagedActivityResultLauncher<String, Boolean>, context: Context) {
         val permission = Manifest.permission.CAMERA
-            if(ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED) {
-                launcher.launch(permission)
+        if(ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED) {
+            launcher.launch(permission)
         }
     }
 
@@ -101,4 +101,8 @@ class ArViewModel(
         return false
     }
 
+    fun hasARSupportingError(status: String): Boolean {
+        Log.e("MainScreen", "maybeEnableArButton: $status")
+        return false
+    }
 }
